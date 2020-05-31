@@ -1,0 +1,11 @@
+
+append_data(){
+   echo "
+   PRAGMA journal_mode=PERSIST;
+   PRAGMA page_size=80000;
+   PRAGMA synchronous=OFF;
+   ATTACH DATABASE '$1' AS source;
+   REPLACE INTO map SELECT * FROM source.map;
+   REPLACE INTO images SELECT * FROM source.images;"\
+   | sqlite3 $DEST
+}
