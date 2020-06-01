@@ -16,7 +16,7 @@ BLAST_VERSION = os.environ.get("BLAST_VERSION")
 MR_SSD = os.environ.get("MR_SSD",'/root/mapgen')
 #REGION_INFO = os.path.join(MR_SSD,'../resources','regions.json')
 REGION_INFO = './regions.json'
-DOWNLOAD_URL = os.environ['MAP_DL_URL']
+DOWNLOAD_URL = 'https://archive.org/download'
 #GENERATED_TILES = MR_SSD + '/output/stage2/'
 GENERATED_TILES = '/library/www/html/internetarchive'
 BASE_SATELLITE_SIZE = "976416768"
@@ -35,11 +35,13 @@ with open(REGION_INFO,'r') as region_fp:
       sys.exit(1)
    map_catalog['maps'] = {}
    for region in data['regions'].keys():
-      map_id = os.path.basename(data['regions'][region]['detail_url'])
+      map_id = 'osm-' + os.path.basename(data['regions'][region]['detail_url'])
       map_catalog['maps'].update({map_id : {}})
       for (key, value) in data['regions'][region].items():
          map_catalog['maps'][map_id].update( {key : value} )
          map_catalog['maps'][map_id]['region'] = region 
+         map_catalog['maps'][map_id]['detail_url'] = os.path.join(DOWNLOAD_URL,map_id,map_id)
+         map_catalog['maps'][map_id]['bittorrent_url'] = os.path.join(DOWNLOAD_URL,map_id,map_id + '.torent')
 
    outstr = json.dumps(map_catalog,indent=2,sort_keys=True) 
    print(outstr)
