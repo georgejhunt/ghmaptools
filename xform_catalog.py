@@ -15,7 +15,7 @@ BLAST_VERSION = os.environ.get("BLAST_VERSION")
 # Variables are being properly defined by environment variables
 MR_SSD = os.environ.get("MR_SSD",'/root/mapgen')
 #REGION_INFO = os.path.join(MR_SSD,'../resources','regions.json')
-REGION_INFO = os.path.join('/opt/iiab/iiab/roles/osm-vector-maps/files','regions.json')
+REGION_INFO = './regions.json'
 DOWNLOAD_URL = os.environ['MAP_DL_URL']
 #GENERATED_TILES = MR_SSD + '/output/stage2/'
 GENERATED_TILES = '/library/www/html/internetarchive'
@@ -46,7 +46,7 @@ with open(REGION_INFO,'r') as region_fp:
    sys.exit(0)
 
    for region in data['regions'].keys():
-      map_id = os.path.basename(data['regions']['detail_url'])
+      map_id = 'osm-' + os.path.basename(data['regions']['detail_url'])
       mbtile = os.path.join(GENERATED_TILES,region+'_z11-z14_2019.mbtiles')
       if region == 'world':
          mbtile = os.environ.get('PLANET_MBTILES','')
@@ -67,7 +67,7 @@ with open(REGION_INFO,'r') as region_fp:
 		 + MAP_VERSION 
       map_catalog['maps'][map_id]['sat_url'] = DOWNLOAD_URL+ '/' + sat_identity + \
                                        '/' + sat_identity
-      tile_identity = os.path.basename(mbtile)
+      tile_identity = 'osm-'+ os.path.basename(mbtile)
       map_catalog['maps'][map_id]['detail_url'] = DOWNLOAD_URL+ '/' + tile_identity + '/'\
              + tile_identity 
       map_catalog['maps'][map_id]['publish'] = "True"

@@ -7,24 +7,16 @@ import json
 import shutil
 import subprocess
 
-# error out if environment is missing
-MR_SSD = os.environ["MR_SSD"]
-
-
-REGION_INFO = os.path.join(MR_SSD,'../resources/regions.json')
-REGION_LIST = os.environ.get("REGION_LIST")
-#REGION_LIST = json.loads(REGION_LIST)
-#print(REGION_LIST)
-rlist = []
+MAP_CATALOG = '/etc/iiab/map-catalog.json'
 outstr='{"list": [\n'
-with open(REGION_INFO,'r') as region_fp:
+with open(MAP_CATALOG,'r') as region_fp:
    try:
       data = json.loads(region_fp.read())
    except:
       print("regions.json parse error")
       sys.exit(1)
 
-   for region in data['regions'].keys():
+   for region in data['maps'].keys():
       outstr += '  "' +region + '",\n'
    outstr = outstr[:-2]
    outstr += '\n]\n}\n'
