@@ -6,23 +6,16 @@ import json
 import sqlite3
 import datetime
 
-MAP_VERSION = os.environ.get("MAP_VERSION",'v.999')
-if MAP_VERSION == 'v.999':
-   print('The environment is not set. Please run "source setenv"') 
-   sys.exit(1)
-MAP_DATE = os.environ.get("MAP_DATE",'v.999')
-BLAST_VERSION = os.environ.get("BLAST_VERSION")
+MAP_DATE = '10/8/2019'
 # Variables are being properly defined by environment variables
-MR_SSD = os.environ.get("MR_SSD",'/root/mapgen')
-#REGION_INFO = os.path.join(MR_SSD,'../resources','regions.json')
 REGION_INFO = './regions.json'
 DOWNLOAD_URL = 'https://archive.org/download'
-#GENERATED_TILES = MR_SSD + '/output/stage2/'
 GENERATED_TILES = '/library/www/html/internetarchive'
 BASE_SATELLITE_SIZE = "976416768"
 BASE_SATELLITE_URL = "https://archive.org/download/satellite_z0-z9_v3.mbtiles/satellite_z0-z9_v3.mbtiles"
 BASE_PLANET_SIZE = "1870077952"
 BASE_PLANET_URL = "https://archive.org/download/osm-planet_z0-z10_2019.mbtiles/osm-planet_z0-z10_2019.mbtiles"
+PLANET_MBTILES = GENERATED_TILES + "/osm_planet_z11-z14_2019.mbtiles"
 
 outstr = ''
 region_list = []
@@ -35,14 +28,17 @@ with open(REGION_INFO,'r') as region_fp:
       sys.exit(1)
    map_catalog['maps'] = {}
    for region in data['regions'].keys():
-      map_id = 'osm-' + os.path.basename(data['regions'][region]['detail_url'])
+      map_id = 'osm_' + os.path.basename(data['regions'][region]['detail_url'])
       map_catalog['maps'].update({map_id : {}})
       for (key, value) in data['regions'][region].items():
          map_catalog['maps'][map_id].update( {key : value} )
          map_catalog['maps'][map_id]['region'] = region 
+         map_catalog['maps'][map_id]['region'] = MAP_DATE
          map_catalog['maps'][map_id]['detail_url'] = os.path.join(DOWNLOAD_URL,map_id,map_id)
          map_catalog['maps'][map_id]['bittorrent_url'] = os.path.join(DOWNLOAD_URL,map_id,map_id + '.torent')
 
+         size = os.path.getsize(GENERATED_TILES + '/' + map_id)
+         map_catalog['maps'][map_id]['size'] = size + int(BASE_PLANET_SIZE) + int(BASE_SATELLITE_SIZE)
    outstr = json.dumps(map_catalog,indent=2,sort_keys=True) 
    print(outstr)
    sys.exit(0)
@@ -51,7 +47,7 @@ with open(REGION_INFO,'r') as region_fp:
       map_id = 'osm-' + os.path.basename(data['regions']['detail_url'])
       mbtile = os.path.join(GENERATED_TILES,region+'_z11-z14_2019.mbtiles')
       if region == 'world':
-         mbtile = os.environ.get('PLANET_MBTILES','')
+         mbtile = PLANET_MBTILES
          map_catalog['maps'][map_id]['osm_size'] = "54776152064"
       if mbtile == '':
          print('problem with planet mbtile')
@@ -62,9 +58,6 @@ with open(REGION_INFO,'r') as region_fp:
       file_ref = identity + '.zip'
       # the folowing were to get started. Now permit independent region release
       #map_catalog['maps'][map_id]['perma_ref'] = perma_ref
-      if BLAST_VERSION == 'True':
-         map_catalog['maps'][map_id]['url'] = DOWNLOAD_URL+ '/' + identity + \
-                                       '/' + identity + '.zip'
       sat_identity = perma_ref + '_sat_' + data['maps'][region]['date'] +'_'\
 		 + MAP_VERSION 
       map_catalog['maps'][map_id]['sat_url'] = DOWNLOAD_URL+ '/' + sat_identity + \
