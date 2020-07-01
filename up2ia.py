@@ -9,6 +9,7 @@ import subprocess
 import internetarchive
 import re
 from datetime import datetime
+from logging import getLogger
 
 MAP_CATALOG = '/etc/iiab/map-catalog.json'
 with open('/opt/iiab/maptools/map.list','r') as fp:
@@ -18,8 +19,11 @@ MAP_LIST = map_js['list']
 print('map.list limits processing to: %s\n'%MAP_LIST)
 
 MR_HARD_DISK = '/library/www/html/internetarchive'
-MAP_DATE = os.environ.get("MAP_DATE",'2019-03-09')
+MAP_DATE = os.environ.get("MAP_DATE",'2019-09-30')
 MAP_VERSION = 'v.2.0`'
+
+log = getLogger(__name__)
+log.setLevel("DEBUG")
 
 with open(MAP_CATALOG,'r') as map_fp:
    try:
@@ -45,7 +49,7 @@ with open(MAP_CATALOG,'r') as map_fp:
 
          # Gather together the metadata for archive.org
          md = {}
-         md['title'] = "Vector tiles for %s"%map
+         md['title'] = "Vector tiles for IIAB: %s"%map
          #md['collection'] = "internetinabox"
          md["creator"] = "Internet in a Box" 
          md["subject"] = "rpi" 
@@ -53,7 +57,7 @@ with open(MAP_CATALOG,'r') as map_fp:
          md["licenseurl"] = "http://creativecommons.org/licenses/by-sa/4.0/"
          md["zip_md5"] = md5
          md["mediatype"] = "software"
-         md["description"] = "This set of vector tiles was abstracted from the planet at https://archive.org/details/osm-vector-mbtiles"
+         md["description"] = "This set of vector tiles was filered from the planet at https://archive.org/details/osm-vector-mbtiles"
 
          identifier = map 
          # Check is this has already been uploaded
@@ -73,9 +77,8 @@ with open(MAP_CATALOG,'r') as map_fp:
          # Debugging information
          print('Uploading %s'%map)
          print('MetaData: %s'%md)
-         sys.exit(1)
          try:
-            r = internetarchive.upload(identifier, files=[target_zip], metadata=md)
+            r = internetarchive.upload(identifier, files=[target_zip], metadata=md, verbose=True)
             print(r[0].status_code) 
             status = r[0].status_code
          except Exception as e:

@@ -1,1 +1,18 @@
 Uploaded en-osm-omt_spanish_speaking_regions_2017-07-03_v0.23 at 10/19/2019, 23:01:00 Status:200
+Uploaded osm_san_jose_z11-z14_2019.mbtiles at 06/03/2020, 12:44:44 Status:200
+Uploaded osm_south_america_z11-z14_2019.mbtiles at 06/03/2020, 17:52:38 Status:200
+Exception from internetarchive:HTTPSConnectionPool(host='s3.us.archive.org', port=443): Read timed out. (read timeout=120)Uploaded osm_africa_z11-z14_2019.mbtiles at 06/08/2020, 11:58:26 Status:error
+Uploaded osm_central_america_z11-z14_2019.mbtiles at 06/08/2020, 13:11:46 Status:200
+Exception from internetarchive:HTTPSConnectionPool(host='s3.us.archive.org', port=443): Read timed out. (read timeout=120)Uploaded osm_europe_z11-z14_2019.mbtiles at 06/09/2020, 00:54:21 Status:error
+Uploaded osm_middle_east_z11-z14_2019.mbtiles at 06/09/2020, 04:02:54 Status:200
+Exception from internetarchive:HTTPSConnectionPool(host='s3.us.archive.org', port=443): Read timed out. (read timeout=120)Uploaded osm_north_america_z11-z14_2019.mbtiles at 06/09/2020, 12:51:47 Status:error
+Exception from internetarchive:('Connection aborted.', timeout('The write operation timed out',))Uploaded osm_north_asia_z11-z14_2019.mbtiles at 06/09/2020, 14:23:42 Status:error
+Uploaded osm_north_asia_z11-z14_2019.mbtiles at 06/10/2020, 01:11:39 Status:200
+Exception from internetarchive:('Connection aborted.', timeout('The write operation timed out',))Uploaded osm_oceania_z11-z14_2019.mbtiles at 06/10/2020, 02:27:02 Status:error
+Uploaded osm_oceania_z11-z14_2019.mbtiles at 06/10/2020, 11:22:51 Status:200
+Exception from internetarchive:('Connection aborted.', timeout('The write operation timed out',))Uploaded osm_planet_z11-z14_2019.mbtiles at 06/10/2020, 14:50:42 Status:error
+Exception from internetarchive:('Connection aborted.', timeout('The write operation timed out',))Uploaded osm_planet_z11-z14_2019.mbtiles at 06/11/2020, 11:28:38 Status:error
+Exception from internetarchive:('Connection aborted.', timeout('The write operation timed out',))Uploaded osm_planet_z11-z14_2019.mbtiles at 06/12/2020, 03:32:32 Status:error
+Exception from internetarchive:('Connection aborted.', timeout('The write operation timed out',))Uploaded osm_planet_z11-z14_2019.mbtiles at 06/12/2020, 20:01:57 Status:error
+Exception from internetarchive:HTTPSConnectionPool(host='s3.us.archive.org', port=443): Read timed out. (read timeout=120)Uploaded osm_spanish_speaking_regions_z11-z14_2019.mbtiles at 06/13/2020, 02:48:05 Status:error
+Exception from internetarchive:HTTPSConnectionPool(host='s3.us.archive.org', port=443): Read timed out. (read timeout=120)Uploaded osm_planet_z11-z14_2019.mbtiles at 06/27/2020, 21:19:09 Status:error

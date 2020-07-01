@@ -6,7 +6,7 @@ import json
 import sqlite3
 import datetime
 
-MAP_DATE = '10/8/2019'
+MAP_DATE = '2019-10-08'
 # Variables are being properly defined by environment variables
 REGION_INFO = './regions.json'
 DOWNLOAD_URL = 'https://archive.org/download'
@@ -33,9 +33,10 @@ with open(REGION_INFO,'r') as region_fp:
       for (key, value) in data['regions'][region].items():
          map_catalog['maps'][map_id].update( {key : value} )
          map_catalog['maps'][map_id]['region'] = region 
-         map_catalog['maps'][map_id]['region'] = MAP_DATE
+         map_catalog['maps'][map_id]['date'] = MAP_DATE
+         map_catalog['maps'][map_id]['sat_url'] = 'not used'
          map_catalog['maps'][map_id]['detail_url'] = os.path.join(DOWNLOAD_URL,map_id,map_id)
-         map_catalog['maps'][map_id]['bittorrent_url'] = os.path.join(DOWNLOAD_URL,map_id,map_id + '.torent')
+         map_catalog['maps'][map_id]['bittorrent_url'] = os.path.join(DOWNLOAD_URL,map_id,map_id + '_archive.torrent')
 
          size = os.path.getsize(GENERATED_TILES + '/' + map_id)
          map_catalog['maps'][map_id]['size'] = size + int(BASE_PLANET_SIZE) + int(BASE_SATELLITE_SIZE)
