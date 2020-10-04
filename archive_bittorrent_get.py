@@ -13,11 +13,14 @@ import transmission_rpc
 import requests
 import argparse
 
+BITTORRENT_USER = 'Admin'
+BITTORRENT_PASSWORD = 'changeme'
 DOWNLOAD_URL = 'https://archive.org/download'
 MAP_CATALOG_URL = 'http://d.iiab.io/content/OSM/vector-tiles/map-catalog.json'
 bt_client = object
 local_torrents = object
 files_info = object
+catalog = object
 
 def get_catalog():
    r = requests.get(MAP_CATALOG_URL)
@@ -31,7 +34,7 @@ def get_local_torrent_files():
    global local_torrents
    global files_info
    local_bts = []
-   bt_client = Client(username='ghunt', password='1jason2')
+   bt_client = Client(username=BITTORRENT_USER,password=BITTORRENT_PASSWORD)
    if not bt_client:
       print('Failed to connect to local transmission bittorrent kj daemon')
       sys.exit(1)
@@ -87,19 +90,29 @@ def start_download(key):
          print("Status:%s Retarting torrent for %s"%(status,catalog[key]['detail_url']))
 
 def show_download_progress(key):
-   torrent_id = get_torrent_index(key)
-   while True:
-      tor = local_torrents[torrent_id]
-      tor.update()
-      percent = tor.progress
-      bytes_completed,bytes_total = get_bittorrent_sizes(local_torrents[torrent_id])
-      completed,units = transmission_rpc.utils.format_size(bytes_completed)
-      total,tot_units = transmission_rpc.utils.format_size(bytes_total)
-      eta = tor.format_eta()
-      print('%3.0f%% %3.1f %s/%3.1f %s   %s'%(percent,completed,units,total,tot_units,eta,))
-      if completed == total:
-         break
-      time.sleep(10)
+   #torrent_id = get_torrent_index(key)
+   downloading = True
+   while downloading:
+      downloading = False
+      for seq,key,title in map_key_list:
+         torrent_index = get_torrent_index(key)
+         tor = local_torrents[torrent_index]
+         tor.update()
+         if tor.progress == 100.0:
+            continue 
+         if tor.status == 'stopped' or tor.status == 'paused':
+            continue
+         downloading = True
+         percent = tor.progress
+         bytes_completed,bytes_total = get_bittorrent_sizes(tor)
+         completed,units = transmission_rpc.utils.format_size(bytes_completed)
+         total,tot_units = transmission_rpc.utils.format_size(bytes_total)
+         eta = tor.format_eta()
+         print('%3.0f%% %3.1f %s/%3.1f %s   %s %s'%(percent,completed,units,total,tot_units,eta,tor.name))
+         if completed == total:
+            print('%3.0f%% %3.1f %s/%3.1f %s   %s %s'%(percent,completed,units,total,tot_units,eta,tor.name))
+            continue
+         time.sleep(10)
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Download OSM Bittorrent files.")
@@ -117,11 +130,11 @@ get_local_torrent_files()
 
 map_key_list = []
 for key in catalog.keys():
-   map_key_list.append((catalog[key]['seq'],key))
+   map_key_list.append((catalog[key]['seq'],key,catalog[key]['title']))
 map_key_list = sorted(map_key_list)
 
 if args.catalog:
-   for seq,key in map_key_list:
+   for seq,key,title in map_key_list:
       size = catalog[key]['size']
       cat_size,cat_units = transmission_rpc.utils.format_size(size)
       found_file_num = get_filelist_index_from_catalog_key(key)
@@ -167,11 +180,23 @@ if args.torrents:
       print('%3.0f%% %5.1f %s %s'%(tor.progress,num,units,name))
    
 if args.all:
-   for key in catalog.keys():
-      torent_index = get_torrent_index(key)
+   total_size = 0
+   for map in catalog.keys():
+      torrent_index = get_torrent_index(map)
       if torrent_index != -1:
-         status = get_bittorrent_status(local_torrents[torrent_index].status)
-         print(status)
+         continue
+      total_size += catalog[map]['size']
+      free_space = bt_client.free_space('/library')
+      bytes,units = transmission_rpc.utils.format_size(free_space)
+      print('Total free space on destination: %5.1f %s'%(bytes,units))
+   if total_size > free_space + 500000000:
+      print('There is not enough space to download all maps')
+      sys.exit(1)
+   for key in catalog.keys():
+      torrent_index = get_torrent_index(key)
+      if torrent_index != -1:
+         status = local_torrents[torrent_index].status
+         #print(status)
          if status == 'stopped'or status == 'paused':
             local_torrents[torrent_index].start()
             print("Status:%s Retarting torrent for %s"%(status,catalog[key]['detail_url']))
@@ -182,8 +207,11 @@ if args.all:
             #print("torrent for %s is dowloading"%key)
             pass
       else:
-          print("Starting torrent for %s"%catalog[key]['detail_url'])
-          #bt_client.add_torrent(catalog[key]['detail_url'],timeout=120)
+          print("Starting torrent for %s"%catalog[key]['bittorrent_url'])
+          try:
+               bt_client.add_torrent(catalog[key]['detail_url'],timeout=120)
+          except:
+               print('Failed to start %s'%catalog[key]['bittorrent_url'])
 
 if args.idx:
    key = None
