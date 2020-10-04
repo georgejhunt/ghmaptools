@@ -29,6 +29,17 @@ def get_catalog():
       return catalog['maps']
    return {}
 
+def enough_space(key):
+   total_size = catalog[key]['size']
+   free_space = bt_client.free_space('/library')
+   bytes,units = transmission_rpc.utils.format_size(free_space)
+   required,req_units = transmission_rpc.utils.format_size(total_size + 500000000)
+   if total_size > free_space + 500000000:
+      print('Total free space on destination: %5.1f %s'%(bytes,units))
+      print('Required free space on destination: %5.1f %s'%(required,req_units))
+      print('There is not enough space to download %s maps'%key)
+      sys.exit(1)
+   
 def get_local_torrent_files():
    global bt_client
    global local_torrents
@@ -221,6 +232,7 @@ if args.idx:
    if key == None:
       print('The idx %s was not found. Did you use the index dispayed with the -c option?'%args.idx)
       sys.exit(1)
+   enough_space(key)
    start_download(key)
    show_download_progress(key)
          
