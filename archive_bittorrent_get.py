@@ -165,7 +165,7 @@ if args.catalog:
             percent = tor.progress
             files = tor.files()
             bytesCompleted = files[0]['completed']
-            length = files[0]['size']
+            length = tor._fields['totalSize'].value
             name = files[0]['name'].split('/')[0]
             num,units = transmission_rpc.utils.format_size(length)
          else:
@@ -185,7 +185,7 @@ if args.torrents:
    for tor in local_torrents:
       files = tor.files()
       bytesCompleted = files[0]['completed']
-      length = files[0]['size']
+      length = tor._fields['totalSize'].value
       name = files[0]['name'].split('/')[0]
       num,units = transmission_rpc.utils.format_size(length)
       print('%3.0f%% %5.1f %s %s'%(tor.progress,num,units,name))
