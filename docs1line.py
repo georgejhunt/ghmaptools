@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # print the second line in each file in this directory
 import glob
 import os

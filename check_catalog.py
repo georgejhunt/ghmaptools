@@ -1,5 +1,6 @@
-#!/usr/bin/env  python
-# read directory, update filenames, sizes,
+#!/usr/bin/env  python3
+
+# read map_catalog.json and write map_catalog.json
 
 import os,sys
 import json
@@ -7,16 +8,10 @@ import sqlite3
 import datetime
 import glob
 
-MAP_VERSION = os.environ.get("MAP_VERSION",'v.999')
-if MAP_VERSION == 'v.999':
-   print('The environment is not set. Please run "source setenv"') 
-   sys.exit(1)
-MAP_DATE = os.environ.get("MAP_DATE",'v.999')
-BLAST_VERSION = os.environ.get("BLAST_VERSION")
+MAP_DATE = '2019-10-08'
 # Variables are being properly defined by environment variables
-MR_SSD = os.environ.get("MR_SSD",'/root/mapgen')
 #CATALOG = os.path.join(MR_SSD,'../resources','regions.json')
-CATALOG = './regions.json'
+CATALOG = './map-catalog.json'
 DOWNLOAD_URL = 'https://archive.org/download'
 #GENERATED_TILES = MR_SSD + '/output/stage2/'
 GENERATED_TILES = '/library/www/html/internetarchive'
@@ -24,9 +19,27 @@ BASE_SATELLITE_SIZE = "976416768"
 BASE_SATELLITE_URL = "https://archive.org/download/satellite_z0-z9_v3.mbtiles/satellite_z0-z9_v3.mbtiles"
 BASE_PLANET_SIZE = "1870077952"
 BASE_PLANET_URL = "https://archive.org/download/osm-planet_z0-z10_2019.mbtiles/osm-planet_z0-z10_2019.mbtiles"
+PLANET_MBTILES = GENERATED_TILES + "/osm_planet_z11-z14_2019.mbtiles"
+
+def process_catalog_list(map):
+   global map_catalog
+   map_catalog[map] = {}
+   for region in data[map].keys():
+      map_id = os.path.basename(data[map][region]['detail_url'])
+      map_catalog[map].update({map_id : {}})
+      for (key, value) in data[map][region].items():
+         map_catalog[map][map_id].update( {key : value} )
+         map_catalog[map][map_id]['date'] = MAP_DATE
+         map_catalog[map][map_id]['sat_url'] = 'not used'
+         map_catalog[map][map_id]['detail_url'] = os.path.join(DOWNLOAD_URL,map_id,map_id)
+         map_catalog[map][map_id]['bittorrent_url'] = os.path.join(DOWNLOAD_URL,map_id,map_id + '_archive.torrent')
+
+
+         size = os.path.getsize(GENERATED_TILES + '/' + map_id)
+         map_catalog[map][map_id]['mbtile_size'] = size
+         map_catalog[map][map_id]['size'] = size + int(BASE_PLANET_SIZE) + int(BASE_SATELLITE_SIZE)
 
 outstr = ''
-region_list = []
 map_catalog = {}
 with open(CATALOG,'r') as catalog_fp:
    try:
@@ -34,25 +47,18 @@ with open(CATALOG,'r') as catalog_fp:
    except:
       print("json error reading regions.json")
       sys.exit(1)
-   map_catalog['maps'] = {}
-   for region in data['regions'].keys():
-      map_id = 'osm-' + os.path.basename(data['regions'][region]['detail_url'])
-      map_catalog['maps'].update({map_id : {}})
-      for (key, value) in data['regions'][region].items():
-         map_catalog['maps'][map_id].update( {key : value} )
-         map_catalog['maps'][map_id]['region'] = region 
-         map_catalog['maps'][map_id]['detail_url'] = os.path.join(DOWNLOAD_URL,map_id,map_id)
-         map_catalog['maps'][map_id]['bittorrent_url'] = os.path.join(DOWNLOAD_URL,map_id,map_id + '.torent')
+   process_catalog_list('maps')
+   process_catalog_list('base')
 
    outstr = json.dumps(map_catalog,indent=2,sort_keys=True) 
    print(outstr)
    sys.exit(0)
 
-   for region in data['regions'].keys():
-      map_id = 'osm-' + os.path.basename(data['regions']['detail_url'])
+   for region in data['maps'].keys():
+      map_id = 'osm-' + os.path.basename(data['maps']['detail_url'])
       mbtile = os.path.join(GENERATED_TILES,region+'_z11-z14_2019.mbtiles')
       if region == 'world':
-         mbtile = os.environ.get('PLANET_MBTILES','')
+         mbtile = PLANET_MBTILES
          map_catalog['maps'][map_id]['osm_size'] = "54776152064"
       if mbtile == '':
          print('problem with planet mbtile')
@@ -63,9 +69,6 @@ with open(CATALOG,'r') as catalog_fp:
       file_ref = identity + '.zip'
       # the folowing were to get started. Now permit independent region release
       #map_catalog['maps'][map_id]['perma_ref'] = perma_ref
-      if BLAST_VERSION == 'True':
-         map_catalog['maps'][map_id]['url'] = DOWNLOAD_URL+ '/' + identity + \
-                                       '/' + identity + '.zip'
       sat_identity = perma_ref + '_sat_' + data['maps'][region]['date'] +'_'\
 		 + MAP_VERSION 
       map_catalog['maps'][map_id]['sat_url'] = DOWNLOAD_URL+ '/' + sat_identity + \

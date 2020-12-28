@@ -8,18 +8,14 @@ import shutil
 import subprocess
 import internetarchive
 
-# error out if environment is missing
-MR_SSD = os.environ["MR_SSD"]
 if len(sys.argv) < 1:
    print("Pass the path of the file to upload as first parameter")
    sys.exit()
 FILENAME = os.path.basename(sys.argv[1])
-MR_HARD_DISK = os.environ.get("MR_HARD_DISK",'/hd/mapgen')
-MAP_DATE = os.environ.get("MAP_DATE",'2019-03-09')
-MAP_VERSION = os.environ.get("MAP_VERSION",'v.999')
-if MAP_VERSION == 'v.999':
-   print('The environment is not set. Please run "source setenv"') 
-   sys.exit(1)
+
+MR_HARD_DISK = '/library/www/html/internetarchive'
+MAP_DATE = os.environ.get("MAP_DATE",'2019-09-30')
+MAP_VERSION = 'v.2.0`'
 
 # Fetch the md5 to see if local file needs uploading
 with open(sys.argv[1] + '.md5','r') as md5_fp:
